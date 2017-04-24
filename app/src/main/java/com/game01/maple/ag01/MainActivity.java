@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.game01.maple.ag01.download.DownLoadUtils;
+import com.game01.maple.ag01.download.DownloadApk;
 import com.game01.maple.ag01.utils.HttpUtils;
 
 import org.json.JSONException;
@@ -20,6 +22,7 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     String checkVersionURL="http://211.149.234.199:23335/AndroidVersionManager/GetNewVersion?action=checkNewestVersion";
+    String downloadAPK="http://211.149.234.199:23335/AndroidVersionManager/downloadAPK/";
     long new_version_code=-1;
 
     private Button button;
@@ -42,6 +45,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     Toast.makeText(MainActivity.this, Common.getVersionCode(MainActivity.this)+"获取数据成功"+new_version_code, Toast.LENGTH_SHORT)
                             .show();
+
+                    if(Common.getVersionCode(MainActivity.this)<new_version_code){
+                        //3.如果手机已经启动下载程序，执行downloadApk。否则跳转到设置界面
+                        if (DownLoadUtils.getInstance(getApplicationContext()).canDownload()) {
+                            DownloadApk.downloadApk(getApplicationContext(), downloadAPK+new_version_code+".apk", "AG01更新", "AG01");
+                        } else {
+                            DownLoadUtils.getInstance(getApplicationContext()).skipToDownloadManager();
+                        }
+                    }
+
                     break;
 
                 case FAILURE:
@@ -65,6 +78,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //1.注册下载广播接收器
+        DownloadApk.registerBroadcast(this);
+        //2.删除已存在的Apk
+        DownloadApk.removeFile(this);
+
         button = (Button) findViewById(R.id.checkVersion);
         button.setOnClickListener(this);
     }
@@ -128,5 +147,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        //4.反注册广播接收器
+        DownloadApk.unregisterBroadcast(this);
+        super.onDestroy();
     }
 }

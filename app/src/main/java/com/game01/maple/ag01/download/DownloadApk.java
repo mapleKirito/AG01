@@ -165,7 +165,7 @@ public class DownloadApk {
      * 删除已下载的文件
      */
     public static void removeFile(Context context) {
-        String filePath = SystemParams.getInstance().getString("downloadApk",null);
+        String filePath = SystemParams.getInstance().getString("AG01",null);
         if(null != filePath) {
             File downloadFile = new File(filePath);
             if(null != downloadFile && downloadFile.exists()) {
