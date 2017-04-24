@@ -50,7 +50,7 @@ public class ApkInstallReceiver extends BroadcastReceiver {
             File f=new File(realPath);
 
             //Toast.makeText(context,(downloadId == downId)+"",Toast.LENGTH_LONG).show();
-            SystemParams.getInstance().setString("downloadApk",downloadUri.getPath());
+            SystemParams.getInstance().setString("AG01",downloadUri.getPath());
 
             if (downloadUri != null) {
                 Intent install= new Intent(Intent.ACTION_VIEW);
