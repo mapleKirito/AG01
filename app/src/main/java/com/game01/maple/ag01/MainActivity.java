@@ -1,5 +1,6 @@
 package com.game01.maple.ag01;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -86,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         button = (Button) findViewById(R.id.checkVersion);
         button.setOnClickListener(this);
+
+        button = (Button) findViewById(R.id.startBtn);
+        button.setOnClickListener(this);
     }
 
     @Override
@@ -142,6 +146,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     };
                 }.start();
+                break;
+
+            case R.id.startBtn:
+                /***
+                 * 转到主界面
+                 */
+                Intent intent=new Intent();
+                intent.setClass(MainActivity.this,GameMainActivity.class);
+                startActivity(intent);
                 break;
 
             default:

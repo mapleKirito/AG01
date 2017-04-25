@@ -1,14 +1,20 @@
 package com.game01.maple.ag01.download;
 
 import android.app.DownloadManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.game01.maple.ag01.config.SystemParams;
@@ -46,7 +52,7 @@ public class DownloadApk {
                 Uri downloadUri = downLoadUtils.getDownloadUri(downloadId);
                 if(null != downloadUri) {
                     //存在下载的APK，如果两个APK相同，启动更新界面。否之则删除，重新下载。
-                    if(compare(getApkInfo(context,downloadUri.getPath()),context)) {
+                    if(compare(getApkInfo(context,getRealFilePath(context,downloadUri)),context)) {
                         startInstall(context, downloadUri);
                         return;
                     } else {
@@ -103,12 +109,29 @@ public class DownloadApk {
      */
     private static void startInstall(Context context, Uri uri) {
 
-        Intent install = new Intent(Intent.ACTION_VIEW);
-        install.setDataAndType(uri, "application/vnd.android.package-archive");
+        //android6.0以上downManager.getUriForDownloadedFile(downloadId)无法获取真正路径
+        String realPath=getRealFilePath(context,uri);
+        //File f=new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)+"/Hobbees.apk");
+        File f=new File(realPath);
+        Intent install= new Intent(Intent.ACTION_VIEW);
         install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if(Build.VERSION.SDK_INT>=24){
+            Uri uriForFile = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", f);
+            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            install.setDataAndType(uriForFile, context.getContentResolver().getType(uriForFile));
+        }else{
+            install.setDataAndType(Uri.fromFile(f), getMIMEType(f));
+        }
         context.startActivity(install);
     }
 
+    private static String getMIMEType(File var0) {
+        String var1 = "";
+        String var2 = var0.getName();
+        String var3 = var2.substring(var2.lastIndexOf(".") + 1, var2.length()).toLowerCase();
+        var1 = MimeTypeMap.getSingleton().getMimeTypeFromExtension(var3);
+        return var1;
+    }
 
     /**
      * 获取APK程序信息
@@ -176,5 +199,28 @@ public class DownloadApk {
                 }
             }
         }
+    }
+
+    private static String getRealFilePath(final Context context, final Uri uri) {
+        if (null == uri) return null;
+        final String scheme = uri.getScheme();
+        String data = null;
+        if (scheme == null)
+            data = uri.getPath();
+        else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            data = uri.getPath();
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.ImageColumns.DATA}, null, null, null);
+            if (null != cursor) {
+                if (cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    if (index > -1) {
+                        data = cursor.getString(index);
+                    }
+                }
+                cursor.close();
+            }
+        }
+        return data;
     }
 }

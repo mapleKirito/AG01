@@ -10,8 +10,8 @@ public class Pedometer implements SensorEventListener {
 	private SensorManager mSensorManager;
 	private Sensor mStepCount;
 	private Sensor mStepDetector;
-	private float mCount;//步行总数 
-	private float mDetector;//步行探测器 
+	private float mCount;
+	private float mDetector;
 	private Context context;
 	private static final int sensorTypeD= Sensor.TYPE_STEP_DETECTOR;
 	private static final int sensorTypeC= Sensor.TYPE_STEP_COUNTER;

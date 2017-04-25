@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">AG01</string>
+    <string name="app_title">计步器</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">000</string>
+    <string name="count">距离上次累计</string>
+    <string name="detected">已经获得（领取）</string>
+    <string name="saveStep">领取步数</string>
 </resources>
